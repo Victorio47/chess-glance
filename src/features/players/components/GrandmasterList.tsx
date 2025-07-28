@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useGrandmasters } from '../context/GrandmastersContext';
 import Loader from '@/shared/ui/Loader';
 
@@ -8,6 +8,9 @@ const GrandmasterList: React.FC = () => {
   const { grandmasters, isLoading, error, isPreloaded, loadGrandmasters } = useGrandmasters();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(30);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Load data if not preloaded
   useEffect(() => {
@@ -57,6 +60,41 @@ const GrandmasterList: React.FC = () => {
     
     return [...new Set([...prefixMatches, ...partialMatches])];
   }, [grandmasters, debouncedQuery, searchIndex]);
+
+  // Get visible items based on search or pagination
+  const visibleGMs = useMemo(() => {
+    if (debouncedQuery.trim()) {
+      // Show all search results immediately
+      return filteredGMs;
+    }
+    // Show paginated results
+    return filteredGMs.slice(0, visibleCount);
+  }, [filteredGMs, debouncedQuery, visibleCount]);
+
+  // Reset visible count when search changes
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      setVisibleCount(30); // Reset for new search
+    }
+  }, [debouncedQuery]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!loadMoreRef.current || debouncedQuery.trim()) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && visibleCount < filteredGMs.length) {
+          setVisibleCount(prev => Math.min(prev + 30, filteredGMs.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredGMs.length, debouncedQuery]);
 
   // Memoized search input handler
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,28 +148,50 @@ const GrandmasterList: React.FC = () => {
             Found {filteredGMs.length} of {grandmasters.length} grandmasters
           </div>
         )}
+        {!searchQuery && (
+          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Showing {visibleGMs.length} of {filteredGMs.length} grandmasters
+          </div>
+        )}
       </div>
 
-      {/* Adaptive Grid Results */}
-      <div className="min-h-[600px] overflow-y-auto pr-2">
-        {filteredGMs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-200">
-            {filteredGMs.map((username) => (
-              <div 
-                key={username}
-                className="bg-white dark:bg-gray-800 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 
-                           transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700
-                           min-h-[60px] flex items-center justify-center"
-              >
-                <a 
-                  href={`/profile/${username}`}
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-center px-4 py-3 w-full h-full flex items-center justify-center"
+      {/* Scrollable Grid Container */}
+      <div 
+        ref={scrollContainerRef}
+        className="max-h-[600px] overflow-y-auto p-2 rounded border border-gray-200 dark:border-gray-700"
+      >
+        {visibleGMs.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-200">
+              {visibleGMs.map((username) => (
+                <div 
+                  key={username}
+                  className="bg-white dark:bg-gray-800 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 
+                             transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700
+                             min-h-[60px] flex items-center justify-center"
                 >
-                  {username}
-                </a>
+                  <a 
+                    href={`/profile/${username}`}
+                    className="text-blue-600 dark:text-blue-400 hover:underline text-center px-4 py-3 w-full h-full flex items-center justify-center"
+                  >
+                    {username}
+                  </a>
+                </div>
+              ))}
+            </div>
+            
+            {/* Load More Trigger */}
+            {!debouncedQuery.trim() && visibleCount < filteredGMs.length && (
+              <div 
+                ref={loadMoreRef}
+                className="flex justify-center py-4"
+              >
+                <div className="text-gray-500 dark:text-gray-400 text-sm">
+                  Loading more...
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="text-center text-gray-500 dark:text-gray-400 py-8">
             {searchQuery ? 'No grandmasters found matching your search' : 'No grandmasters found'}
