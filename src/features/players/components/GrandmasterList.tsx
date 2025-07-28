@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { fetchGMs } from '@/features/players/api/fetchGMs';
 import Loader from '@/shared/ui/Loader';
 import Link from 'next/link';
@@ -9,12 +10,19 @@ interface GMList {
   players: string[];
 }
 
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: string[];
+}
+
 const GrandmasterList: React.FC = () => {
   const [allGMs, setAllGMs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const listRef = useRef<List>(null);
 
   // Create search index for faster filtering
   const searchIndex = useMemo(() => {
@@ -83,6 +91,20 @@ const GrandmasterList: React.FC = () => {
     setSearchQuery(e.target.value);
   }, []);
 
+  // Row renderer for virtualized list
+  const Row = useCallback(({ index, style, data }: RowProps) => {
+    const username = data[index];
+    return (
+      <div style={style} className="px-2">
+        <div className="bg-white dark:bg-gray-800 rounded shadow p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <Link href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+            {username}
+          </Link>
+        </div>
+      </div>
+    );
+  }, []);
+
   if (loading) return <Loader />;
   if (error) return <div className="text-red-500 p-4">Error: {error}</div>;
 
@@ -108,21 +130,20 @@ const GrandmasterList: React.FC = () => {
         )}
       </div>
 
-      {/* Results Grid */}
-      <div 
-        className="h-[600px] overflow-y-auto pr-2"
-        style={{ scrollbarWidth: 'thin', scrollbarColor: '#9CA3AF #F3F4F6' }}
-      >
+      {/* Virtualized Results */}
+      <div className="h-[600px]">
         {filteredGMs.length > 0 ? (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {filteredGMs.map((username) => (
-              <li key={username} className="bg-white dark:bg-gray-800 rounded shadow p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                <Link href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {username}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <List
+            ref={listRef}
+            height={600}
+            itemCount={filteredGMs.length}
+            itemSize={50}
+            itemData={filteredGMs}
+            width="100%"
+            className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600"
+          >
+            {Row}
+          </List>
         ) : (
           <div className="text-center text-gray-500 dark:text-gray-400 py-8">
             {searchQuery ? 'No grandmasters found matching your search' : 'No grandmasters found'}
