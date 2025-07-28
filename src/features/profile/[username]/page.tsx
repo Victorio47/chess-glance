@@ -18,15 +18,16 @@ const ProfileContent: React.FC<{ username: string }> = async ({ username }) => {
       </div>
     );
   } catch (error: any) {
-    return <div className="text-red-500 p-4">Ошибка: {error.message}</div>;
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   }
 };
 
-const ProfilePage = ({ params }: ProfilePageProps) => {
+const ProfilePage = async ({ params }: ProfilePageProps) => {
+  const username = await params.username;
   return (
     <Suspense fallback={<Loader />}>
       {/* @ts-expect-error Async Server Component */}
-      <ProfileContent username={params.username} />
+      <ProfileContent username={username} />
     </Suspense>
   );
 };
