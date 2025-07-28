@@ -3,7 +3,7 @@ let cacheTimestamp: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const fetchGMs = async (): Promise<any> => {
-  // Check cache first
+  // Check cache fir  st
   const now = Date.now();
   if (cachedGMs && (now - cacheTimestamp) < CACHE_DURATION) {
     console.log('Using cached GMs data');
