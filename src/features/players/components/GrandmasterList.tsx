@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { fetchGMs } from '@/features/players/api/fetchGMs';
 import Loader from '@/shared/ui/Loader';
 import Link from 'next/link';
@@ -10,7 +9,6 @@ interface GMList {
   players: string[];
 }
 
-const ITEM_HEIGHT = 60;
 const INITIAL_ITEMS = 50;
 const ITEMS_PER_PAGE = 20;
 
@@ -21,14 +19,14 @@ const GrandmasterList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-      setCurrentPage(1); // Reset to first page on search
     }, 300);
 
     return () => clearTimeout(timer);
@@ -56,7 +54,30 @@ const GrandmasterList: React.FC = () => {
     loadGMs();
   }, []);
 
-  // Filter and paginate results
+  // Auto-load more on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore || isLoadingMore || searchQuery) return;
+
+      const container = containerRef.current;
+      if (!container) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+      if (isNearBottom) {
+        loadMore();
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasMore, isLoadingMore, searchQuery]);
+
+  // Filter results
   const filteredGMs = useMemo(() => {
     if (!debouncedQuery.trim()) return displayedGMs;
     
@@ -67,38 +88,27 @@ const GrandmasterList: React.FC = () => {
   }, [allGMs, displayedGMs, debouncedQuery]);
 
   // Load more items
-  const loadMore = useCallback(() => {
-    if (!hasMore || loading) return;
+  const loadMore = useCallback(async () => {
+    if (!hasMore || isLoadingMore) return;
 
+    setIsLoadingMore(true);
+    
+    // Simulate async loading
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     const startIndex = displayedGMs.length;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const newItems = allGMs.slice(startIndex, endIndex);
     
     setDisplayedGMs(prev => [...prev, ...newItems]);
     setHasMore(endIndex < allGMs.length);
-    setCurrentPage(prev => prev + 1);
-  }, [allGMs, displayedGMs.length, hasMore, loading]);
+    setIsLoadingMore(false);
+  }, [allGMs, displayedGMs.length, hasMore, isLoadingMore]);
 
   // Memoized search input handler
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
-
-  // Virtualized row renderer
-  const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const username = filteredGMs[index];
-    if (!username) return null;
-
-    return (
-      <div style={style} className="px-2">
-        <div className="bg-white dark:bg-gray-800 rounded shadow p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition h-full">
-          <Link href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline block">
-            {username}
-          </Link>
-        </div>
-      </div>
-    );
-  }, [filteredGMs]);
 
   if (loading) return <Loader />;
   if (error) return <div className="text-red-500 p-4">Error: {error}</div>;
@@ -125,38 +135,33 @@ const GrandmasterList: React.FC = () => {
         )}
       </div>
 
-      {/* Virtualized List */}
-      {filteredGMs.length > 0 ? (
-        <div className="h-[600px]">
-          <List
-            height={600}
-            itemCount={filteredGMs.length}
-            itemSize={ITEM_HEIGHT}
-            width="100%"
-            itemData={filteredGMs}
-          >
-            {Row}
-          </List>
-          
-          {/* Load More Button */}
-          {!searchQuery && hasMore && (
-            <div className="mt-4 text-center">
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
-                           disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Loading...' : 'Load More'}
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-          {searchQuery ? 'No grandmasters found matching your search' : 'No grandmasters found'}
-        </div>
-      )}
+      {/* Results Grid */}
+      <div 
+        ref={containerRef}
+        className="h-[600px] overflow-y-auto pr-2"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#9CA3AF #F3F4F6' }}
+      >
+        {filteredGMs.length > 0 ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            {filteredGMs.map((username) => (
+              <li key={username} className="bg-white dark:bg-gray-800 rounded shadow p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <Link href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {username}
+                </Link>
+              </li>
+            ))}
+            {isLoadingMore && (
+              <li className="col-span-full text-center py-4">
+                <Loader />
+              </li>
+            )}
+          </ul>
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            {searchQuery ? 'No grandmasters found matching your search' : 'No grandmasters found'}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
