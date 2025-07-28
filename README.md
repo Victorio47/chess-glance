@@ -1,66 +1,66 @@
 # ♟️ ChessGlance
 
-**ChessGlance** — это веб-приложение, которое показывает список гроссмейстеров с Chess.com.  
-Вы можете кликнуть на любого игрока и перейти на отдельную страницу его профиля, где отображается таймер: сколько времени прошло с момента последней активности. Таймер обновляется в реальном времени ⏱
+**ChessGlance** — a web application that displays a list of grandmasters from Chess.com.  
+You can click on any player and navigate to their individual profile page, where a timer shows how much time has passed since their last activity. The timer updates in real-time ⏱
 
 ---
 
-## 🎯 Цель проекта
+## 🎯 Project Goal
 
-Этот проект создан как быстрый эксперимент:
-- протестировать возможности **искусственного интеллекта** в роли разработчика
-- проверить, насколько быстро можно собрать рабочий, стильный и полезный продукт
-- научиться использовать AI-инструменты как Cursor и ChatGPT в реальной разработке
+This project was created as a quick experiment:
+- test the capabilities of **artificial intelligence** in the role of a developer
+- check how quickly you can build a working, stylish and useful product
+- learn to use AI tools like Cursor and ChatGPT in real development
 
 ---
 
-## 🛠️ Используемые технологии
+## 🛠️ Technologies Used
 
-### 🧠 Инструменты
+### 🧠 Tools
 
-| Инструмент     | Назначение                                |
+| Tool           | Purpose                                    |
 |----------------|--------------------------------------------|
-| **Cursor**     | AI-интерфейс для генерации и редактирования кода |
-| **ChatGPT**    | Архитектура, генерация компонентов, помощь в структуре |
-| **Vercel**     | Хостинг и CI/CD для Next.js приложений     |
-| **GitHub**     | Репозиторий и история разработки           |
+| **Cursor**     | AI interface for code generation and editing |
+| **ChatGPT**    | Architecture, component generation, structure help |
+| **Vercel**     | Hosting and CI/CD for Next.js applications |
+| **GitHub**     | Repository and development history         |
 
 ---
 
-### ⚛️ Фреймворк и язык
+### ⚛️ Framework and Language
 
-| Технология      | Назначение                            |
-|-----------------|----------------------------------------|
-| **Next.js 15+** | Основной фреймворк (App Router)        |
-| **React**       | UI-библиотека                          |
-| **TypeScript**  | Типизация                              |
+| Technology     | Purpose                            |
+|----------------|------------------------------------|
+| **Next.js 15+** | Main framework (App Router)        |
+| **React**      | UI library                         |
+| **TypeScript** | Typing                             |
 
 ---
 
-### 🎨 Стилизация
+### 🎨 Styling
 
-| Технология      | Назначение                            |
-|-----------------|----------------------------------------|
-| **TailwindCSS** | Утилитарный CSS-фреймворк             |
-| **PostCSS**     | Препроцессинг стилей под капотом       |
+| Technology     | Purpose                            |
+|----------------|------------------------------------|
+| **TailwindCSS** | Utility CSS framework             |
+| **PostCSS**    | Style preprocessing under the hood |
 
-> Благодаря TailwindCSS проект легко масштабируется, и при желании можно настроить **кастомную тему**: цвета, шрифты, отступы — всё задаётся через `tailwind.config.ts`.
+> Thanks to TailwindCSS, the project scales easily, and if desired, you can configure a **custom theme**: colors, fonts, spacing — everything is set through `tailwind.config.ts`.
 
 ---
 
 ## 📡 API
 
-📍 Используются открытые публичные API от [Chess.com](https://www.chess.com/news/view/published-data-api):
+📍 Uses open public APIs from [Chess.com](https://www.chess.com/news/view/published-data-api):
 
 - `GET https://api.chess.com/pub/titled/GM`  
-  Возвращает список всех пользователей с титулом Grandmaster
+  Returns a list of all users with Grandmaster title
 
 - `GET https://api.chess.com/pub/player/{username}`  
-  Возвращает профиль игрока: имя, страна, аватар, регистрация, последний онлайн
+  Returns player profile: name, country, avatar, registration, last online
 
 ---
 
-## 🧪 Как запустить локально
+## 🧪 How to Run Locally
 
 ```bash
 git clone git@github.com:Victorio47/chess-glance.git
@@ -69,88 +69,88 @@ npm install
 npm run dev
 ```
 
-Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌐 Демо
+## 🌐 Demo
 
-**Живое приложение:** [https://chess-glance-mzby.vercel.app/](https://chess-glance-mzby.vercel.app/)
-
----
-
-## 🎨 Особенности
-
-### 🌙 Поддержка темной темы
-- Автоматическое переключение в зависимости от системных настроек
-- Контрастные цвета для лучшей читаемости
-- Адаптивный дизайн для всех устройств
-
-### ⚡ Производительность
-- Server-Side Rendering (SSR) для быстрой загрузки
-- Оптимизированные изображения и компоненты
-- Минимальный размер бандла
-
-### 🔄 Реальное время
-- Таймер активности обновляется каждую секунду
-- Автоматическое обновление статуса игроков
-- Плавные анимации и переходы
+**Live application:** [https://chess-glance-mzby.vercel.app/](https://chess-glance-mzby.vercel.app/)
 
 ---
 
-## 📁 Структура проекта
+## 🎨 Features
+
+### 🌙 Dark Theme Support
+- Automatic switching based on system settings
+- Contrast colors for better readability
+- Responsive design for all devices
+
+### ⚡ Performance
+- Server-Side Rendering (SSR) for fast loading
+- Optimized images and components
+- Minimal bundle size
+
+### 🔄 Real-time
+- Activity timer updates every second
+- Automatic player status updates
+- Smooth animations and transitions
+
+---
+
+## 📁 Project Structure
 
 ```
 chess-glance/
 ├── src/
-│   ├── app/                    # App Router страницы
-│   │   ├── page.tsx           # Главная страница
-│   │   ├── players/           # Список игроков
-│   │   └── profile/[username]/ # Профиль игрока
-│   ├── features/              # Функциональные модули
-│   │   ├── players/           # Логика списка игроков
-│   │   └── profile/           # Логика профилей
-│   └── shared/                # Общие компоненты
-├── public/                    # Статические файлы
+│   ├── app/                    # App Router pages
+│   │   ├── page.tsx           # Main page
+│   │   ├── players/           # Players list
+│   │   └── profile/[username]/ # Player profile
+│   ├── features/              # Functional modules
+│   │   ├── players/           # Players list logic
+│   │   └── profile/           # Profile logic
+│   └── shared/                # Shared components
+├── public/                    # Static files
 └── package.json
 ```
 
 ---
 
-## 🚀 Развертывание
+## 🚀 Deployment
 
-Проект автоматически развертывается на Vercel при пуше в main ветку:
+The project automatically deploys to Vercel when pushing to the main branch:
 
-1. Форкните репозиторий
-2. Подключите к Vercel
-3. Настройте переменные окружения (если нужны)
-4. Готово! 🎉
-
----
-
-## 🤝 Вклад в проект
-
-1. Форкните репозиторий
-2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
-3. Закоммитьте изменения (`git commit -m 'Add amazing feature'`)
-4. Запушьте в ветку (`git push origin feature/amazing-feature`)
-5. Откройте Pull Request
+1. Fork the repository
+2. Connect to Vercel
+3. Configure environment variables (if needed)
+4. Done! 🎉
 
 ---
 
-## 📄 Лицензия
+## 🤝 Contributing
 
-Этот проект создан в образовательных целях. Используйте свободно!
-
----
-
-## 🙏 Благодарности
-
-- [Chess.com](https://www.chess.com/) за открытое API
-- [Vercel](https://vercel.com/) за отличную платформу развертывания
-- [TailwindCSS](https://tailwindcss.com/) за прекрасный CSS-фреймворк
-- AI-инструментам за помощь в разработке 🤖
+1. Fork the repository
+2. Create a branch for a new feature (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-*Создано с помощью AI в качестве эксперимента по быстрой разработке* 🚀
+## 📄 License
+
+This project was created for educational purposes. Use freely!
+
+---
+
+## 🙏 Acknowledgments
+
+- [Chess.com](https://www.chess.com/) for the open API
+- [Vercel](https://vercel.com/) for the excellent deployment platform
+- [TailwindCSS](https://tailwindcss.com/) for the wonderful CSS framework
+- AI tools for development assistance 🤖
+
+---
+
+*Created with AI as an experiment in rapid development* 🚀
