@@ -1,10 +1,10 @@
-export async function fetchGMs(): Promise<any> {
+const fetchGMs = async (): Promise<any> => {
   const res = await fetch('https://api.chess.com/pub/titled/GM');
   if (!res.ok) {
     throw new Error(`Ошибка загрузки гроссмейстеров: ${res.status}`);
   }
   return res.json();
-}
+};
 
-// Явный экспорт по умолчанию для совместимости
+export { fetchGMs };
 export default fetchGMs; 

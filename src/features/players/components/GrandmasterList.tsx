@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import fetchGMs from '@/features/players/api/fetchGMs';
+import { fetchGMs } from '@/features/players/api/fetchGMs';
 import Loader from '@/shared/ui/Loader';
 import Link from 'next/link';
 
@@ -15,15 +15,21 @@ const GrandmasterList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchGMs()
-      .then((data: GMList) => {
+    const loadGMs = async () => {
+      try {
+        console.log('Loading GMs...');
+        const data: GMList = await fetchGMs();
+        console.log('GMs loaded:', data);
         setGMs(data.players || []);
         setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
+      } catch (err: any) {
+        console.error('Error loading GMs:', err);
+        setError(err.message || 'Failed to load grandmasters');
         setLoading(false);
-      });
+      }
+    };
+
+    loadGMs();
   }, []);
 
   if (loading) return <Loader />;
