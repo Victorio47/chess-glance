@@ -40,14 +40,14 @@ const GrandmasterList: React.FC = () => {
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
         {gms && gms.length > 0 ? (
           gms.map((username) => (
-            <li key={username} className="bg-white rounded shadow p-2 hover:bg-gray-50 transition">
-              <Link href={`/profile/${username}`} className="text-blue-600 hover:underline">
+            <li key={username} className="bg-white dark:bg-gray-800 rounded shadow p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+              <Link href={`/profile/${username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                 {username}
               </Link>
             </li>
           ))
         ) : (
-          <li className="col-span-full text-center text-gray-500">No grandmasters found</li>
+          <li className="col-span-full text-center text-gray-500 dark:text-gray-400">No grandmasters found</li>
         )}
       </ul>
     </div>

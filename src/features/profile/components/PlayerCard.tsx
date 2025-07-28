@@ -20,7 +20,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   status,
 }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded shadow p-4 flex flex-col items-center max-w-xs mx-auto">
+    <div className="bg-white dark:bg-gray-500 rounded shadow p-4 flex flex-col items-center max-w-xs mx-auto">
       {avatar && (
         <img
           src={avatar}
