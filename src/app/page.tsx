@@ -5,12 +5,12 @@ import { useEffect } from 'react';
 import { useGrandmasters } from '@/features/players/context/GrandmastersContext';
 
 export default function HomePage() {
-  const { preloadGrandmasters } = useGrandmasters();
+  const { loadGrandmasters } = useGrandmasters();
 
   // Preload grandmasters data when user visits home page
   useEffect(() => {
-    preloadGrandmasters();
-  }, [preloadGrandmasters]);
+    loadGrandmasters();
+  }, [loadGrandmasters]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">

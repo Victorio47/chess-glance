@@ -7,9 +7,7 @@ interface GrandmastersContextType {
   grandmasters: string[];
   isLoading: boolean;
   error: string | null;
-  isPreloaded: boolean;
   loadGrandmasters: () => Promise<void>;
-  preloadGrandmasters: () => void;
 }
 
 const GrandmastersContext = createContext<GrandmastersContextType | undefined>(undefined);
@@ -30,10 +28,9 @@ export const GrandmastersProvider: React.FC<GrandmastersProviderProps> = ({ chil
   const [grandmasters, setGrandmasters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPreloaded, setIsPreloaded] = useState(false);
 
   const loadGrandmasters = useCallback(async () => {
-    if (grandmasters.length > 0) return; // Already loaded
+    if (grandmasters.length > 0 || isLoading) return; // Already loaded or loading
     
     setIsLoading(true);
     setError(null);
@@ -43,7 +40,6 @@ export const GrandmastersProvider: React.FC<GrandmastersProviderProps> = ({ chil
       const data = await fetchGMs();
       const players = data.players || [];
       setGrandmasters(players);
-      setIsPreloaded(true);
       console.log(`Loaded ${players.length} grandmasters`);
     } catch (err: any) {
       console.error('Error loading grandmasters:', err);
@@ -51,21 +47,13 @@ export const GrandmastersProvider: React.FC<GrandmastersProviderProps> = ({ chil
     } finally {
       setIsLoading(false);
     }
-  }, [grandmasters.length]);
-
-  const preloadGrandmasters = useCallback(() => {
-    if (grandmasters.length === 0 && !isLoading) {
-      loadGrandmasters();
-    }
-  }, [grandmasters.length, isLoading, loadGrandmasters]);
+  }, [grandmasters.length, isLoading]);
 
   const value: GrandmastersContextType = {
     grandmasters,
     isLoading,
     error,
-    isPreloaded,
     loadGrandmasters,
-    preloadGrandmasters,
   };
 
   return (

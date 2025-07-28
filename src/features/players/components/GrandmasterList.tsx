@@ -3,84 +3,51 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useGrandmasters } from '../context/GrandmastersContext';
 import Loader from '@/shared/ui/Loader';
+import Card from '@/shared/ui/Card';
+import Button from '@/shared/ui/Button';
+import Input from '@/shared/ui/Input';
 
 const GrandmasterList: React.FC = () => {
-  const { grandmasters, isLoading, error, isPreloaded, loadGrandmasters } = useGrandmasters();
+  const { grandmasters, isLoading, error, loadGrandmasters } = useGrandmasters();
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(30);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Load data if not preloaded
+  // Load data on mount
   useEffect(() => {
-    if (!isPreloaded && !isLoading) {
+    if (grandmasters.length === 0 && !isLoading) {
       loadGrandmasters();
     }
-  }, [isPreloaded, isLoading, loadGrandmasters]);
+  }, [grandmasters.length, isLoading, loadGrandmasters]);
 
-  // Create optimized search index
-  const searchIndex = useMemo(() => {
-    return grandmasters.reduce((acc, username, index) => {
-      const lowerUsername = username.toLowerCase();
-      // Create prefixes for instant search
-      for (let i = 1; i <= Math.min(lowerUsername.length, 10); i++) {
-        const prefix = lowerUsername.substring(0, i);
-        if (!acc[prefix]) acc[prefix] = [];
-        acc[prefix].push(index);
-      }
-      return acc;
-    }, {} as Record<string, number[]>);
-  }, [grandmasters]);
-
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 200); // Reduced debounce time for better UX
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Optimized filtering with search index
+  // Simple filtering
   const filteredGMs = useMemo(() => {
-    if (!debouncedQuery.trim()) return grandmasters;
-    
-    const query = debouncedQuery.toLowerCase();
-    
-    // Use search index for instant prefix matches
-    const matchingIndices = searchIndex[query] || [];
-    const prefixMatches = matchingIndices.map(index => grandmasters[index]);
-    
-    // Also check for partial matches (for non-prefix searches)
-    const partialMatches = grandmasters.filter(username => 
-      username.toLowerCase().includes(query) && 
-      !matchingIndices.includes(grandmasters.indexOf(username))
+    if (!searchQuery.trim()) return grandmasters;
+    return grandmasters.filter((gm) => 
+      gm.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
-    return [...new Set([...prefixMatches, ...partialMatches])];
-  }, [grandmasters, debouncedQuery, searchIndex]);
+  }, [grandmasters, searchQuery]);
 
   // Get visible items based on search or pagination
   const visibleGMs = useMemo(() => {
-    if (debouncedQuery.trim()) {
+    if (searchQuery.trim()) {
       // Show all search results immediately
       return filteredGMs;
     }
     // Show paginated results
     return filteredGMs.slice(0, visibleCount);
-  }, [filteredGMs, debouncedQuery, visibleCount]);
+  }, [filteredGMs, searchQuery, visibleCount]);
 
   // Reset visible count when search changes
   useEffect(() => {
-    if (debouncedQuery.trim()) {
-      setVisibleCount(30); // Reset for new search
+    if (searchQuery.trim()) {
+      setVisibleCount(30);
     }
-  }, [debouncedQuery]);
+  }, [searchQuery]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (!loadMoreRef.current || debouncedQuery.trim()) return;
+    if (!loadMoreRef.current || searchQuery.trim()) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,7 +61,7 @@ const GrandmasterList: React.FC = () => {
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [visibleCount, filteredGMs.length, debouncedQuery]);
+  }, [visibleCount, filteredGMs.length, searchQuery]);
 
   // Memoized search input handler
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,12 +85,9 @@ const GrandmasterList: React.FC = () => {
     return (
       <div className="text-center p-8">
         <div className="text-red-500 mb-4">Error: {error}</div>
-        <button 
-          onClick={loadGrandmasters}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-        >
+        <Button onClick={loadGrandmasters}>
           Retry
-        </button>
+        </Button>
       </div>
     );
   }
@@ -132,16 +96,10 @@ const GrandmasterList: React.FC = () => {
     <div className="p-4">
       {/* Search Input */}
       <div className="mb-6">
-        <input
-          type="text"
+        <Input
           placeholder="Search grandmasters..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                     bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
-                     placeholder-gray-500 dark:placeholder-gray-400
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                     transition-colors duration-200"
         />
         {searchQuery && (
           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -156,19 +114,14 @@ const GrandmasterList: React.FC = () => {
       </div>
 
       {/* Scrollable Grid Container */}
-      <div 
-        ref={scrollContainerRef}
-        className="max-h-[600px] overflow-y-auto p-2 rounded border border-gray-200 dark:border-gray-700"
-      >
+      <div className="max-h-[600px] overflow-y-auto p-4 rounded">
         {visibleGMs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-200">
               {visibleGMs.map((username) => (
-                <div 
+                <Card 
                   key={username}
-                  className="bg-white dark:bg-gray-800 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 
-                             transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700
-                             min-h-[60px] flex items-center justify-center"
+                  className="min-h-[60px] flex items-center justify-center cursor-pointer"
                 >
                   <a 
                     href={`/profile/${username}`}
@@ -176,12 +129,12 @@ const GrandmasterList: React.FC = () => {
                   >
                     {username}
                   </a>
-                </div>
+                </Card>
               ))}
             </div>
             
             {/* Load More Trigger */}
-            {!debouncedQuery.trim() && visibleCount < filteredGMs.length && (
+            {!searchQuery.trim() && visibleCount < filteredGMs.length && (
               <div 
                 ref={loadMoreRef}
                 className="flex justify-center py-4"

@@ -14,25 +14,19 @@ function formatTimeAgo(secondsAgo: number): string {
 }
 
 const ActivityTimer: React.FC<ActivityTimerProps> = ({ last_online }) => {
-  const [now, setNow] = useState<number | null>(null);
+  const [now, setNow] = useState<number>(Date.now());
 
   useEffect(() => {
-    // Устанавливаем начальное время только на клиенте
-    setNow(Date.now());
-    
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Не рендерим ничего пока не загрузились на клиенте
-  if (now === null) {
-    return <div className="text-xs text-gray-500 dark:text-white mt-2">Loading...</div>;
-  }
-
   const secondsAgo = Math.floor((now - last_online * 1000) / 1000);
 
   return (
-    <div className="text-xs text-gray-500 dark:text-white mt-2">Last seen: {formatTimeAgo(secondsAgo)}</div>
+    <div className="text-xs text-gray-500 dark:text-white mt-2">
+      Last seen: {formatTimeAgo(secondsAgo)}
+    </div>
   );
 };
 
