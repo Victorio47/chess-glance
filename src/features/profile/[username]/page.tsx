@@ -4,10 +4,6 @@ import ActivityTimer from '@/features/profile/components/ActivityTimer';
 import { fetchPlayerProfile } from '@/features/profile/api/fetchPlayerProfile';
 import Loader from '@/shared/ui/Loader';
 
-interface ProfilePageProps {
-  params: { username: string };
-}
-
 const ProfileContent: React.FC<{ username: string }> = async ({ username }) => {
   try {
     const profile = await fetchPlayerProfile(username);
@@ -22,11 +18,10 @@ const ProfileContent: React.FC<{ username: string }> = async ({ username }) => {
   }
 };
 
-const ProfilePage = async ({ params }: ProfilePageProps) => {
-  const username = await params.username;
+const ProfilePage = async ({ params }: { params: Promise<{ username: string }> }) => {
+  const { username } = await params;
   return (
     <Suspense fallback={<Loader />}>
-      {/* @ts-expect-error Async Server Component */}
       <ProfileContent username={username} />
     </Suspense>
   );
