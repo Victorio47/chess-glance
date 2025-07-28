@@ -1,21 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useGrandmasters } from '../context/GrandmastersContext';
 import Loader from '@/shared/ui/Loader';
-
-interface RowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: string[];
-}
 
 const GrandmasterList: React.FC = () => {
   const { grandmasters, isLoading, error, isPreloaded, loadGrandmasters } = useGrandmasters();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const listRef = useRef<List>(null);
 
   // Load data if not preloaded
   useEffect(() => {
@@ -71,30 +63,6 @@ const GrandmasterList: React.FC = () => {
     setSearchQuery(e.target.value);
   }, []);
 
-  // Row renderer for virtualized list
-  const Row = useCallback(({ index, style, data }: RowProps) => {
-    const username = data[index];
-    return (
-      <div style={style} className="px-2">
-        <div className="bg-white dark:bg-gray-800 rounded shadow p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-          <a 
-            href={`/profile/${username}`}
-            className="text-blue-600 dark:text-blue-400 hover:underline block"
-          >
-            {username}
-          </a>
-        </div>
-      </div>
-    );
-  }, []);
-
-  // Scroll to top when search changes
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo(0);
-    }
-  }, [debouncedQuery]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -144,21 +112,26 @@ const GrandmasterList: React.FC = () => {
         )}
       </div>
 
-      {/* Virtualized Results */}
-      <div className="h-[600px]">
+      {/* Adaptive Grid Results */}
+      <div className="min-h-[600px] overflow-y-auto pr-2">
         {filteredGMs.length > 0 ? (
-          <List
-            ref={listRef}
-            height={600}
-            itemCount={filteredGMs.length}
-            itemSize={50}
-            itemData={filteredGMs}
-            width="100%"
-            className="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600"
-            overscanCount={5} // Pre-render 5 items above/below viewport
-          >
-            {Row}
-          </List>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-200">
+            {filteredGMs.map((username) => (
+              <div 
+                key={username}
+                className="bg-white dark:bg-gray-800 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 
+                           transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700
+                           min-h-[60px] flex items-center justify-center"
+              >
+                <a 
+                  href={`/profile/${username}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline text-center px-4 py-3 w-full h-full flex items-center justify-center"
+                >
+                  {username}
+                </a>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center text-gray-500 dark:text-gray-400 py-8">
             {searchQuery ? 'No grandmasters found matching your search' : 'No grandmasters found'}
