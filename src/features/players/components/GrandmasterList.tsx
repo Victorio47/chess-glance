@@ -23,6 +23,20 @@ const GrandmasterList: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Create search index for faster filtering
+  const searchIndex = useMemo(() => {
+    return allGMs.reduce((acc, username, index) => {
+      const lowerUsername = username.toLowerCase();
+      // Create prefixes for faster search
+      for (let i = 1; i <= lowerUsername.length; i++) {
+        const prefix = lowerUsername.substring(0, i);
+        if (!acc[prefix]) acc[prefix] = [];
+        acc[prefix].push(index);
+      }
+      return acc;
+    }, {} as Record<string, number[]>);
+  }, [allGMs]);
+
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,15 +91,24 @@ const GrandmasterList: React.FC = () => {
     }
   }, [hasMore, isLoadingMore, searchQuery]);
 
-  // Filter results
+  // Optimized filtering with search index
   const filteredGMs = useMemo(() => {
     if (!debouncedQuery.trim()) return displayedGMs;
     
     const query = debouncedQuery.toLowerCase();
-    return allGMs.filter(username => 
-      username.toLowerCase().includes(query)
+    
+    // Use search index for faster filtering
+    const matchingIndices = searchIndex[query] || [];
+    const allMatchingUsernames = matchingIndices.map(index => allGMs[index]);
+    
+    // Also check for partial matches
+    const partialMatches = allGMs.filter(username => 
+      username.toLowerCase().includes(query) && 
+      !matchingIndices.includes(allGMs.indexOf(username))
     );
-  }, [allGMs, displayedGMs, debouncedQuery]);
+    
+    return [...new Set([...allMatchingUsernames, ...partialMatches])];
+  }, [allGMs, displayedGMs, debouncedQuery, searchIndex]);
 
   // Load more items
   const loadMore = useCallback(async () => {
