@@ -75,7 +75,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🌐 Demo
 
-**Live application:** [https://chess-glance-mzby.vercel.app/](https://chess-glance-mzby.vercel.app/)
+**Live application:** [https://chess-glance-7o3p.vercel.app/](https://chess-glance-7o3p.vercel.app/)
 
 ---
 
