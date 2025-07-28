@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import PlayerCard from '@/features/profile/components/PlayerCard';
 import ActivityTimer from '@/features/profile/components/ActivityTimer';
-import { fetchPlayerProfile } from '@/features/profile/api/fetchPlayerProfile';
+import fetchPlayerProfile from '@/features/profile/api/fetchPlayerProfile';
 import Loader from '@/shared/ui/Loader';
 
 const ProfileContent: React.FC<{ username: string }> = async ({ username }) => {

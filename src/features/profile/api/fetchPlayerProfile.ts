@@ -4,4 +4,7 @@ export async function fetchPlayerProfile(username: string): Promise<any> {
     throw new Error(`Ошибка загрузки профиля игрока: ${res.status}`);
   }
   return res.json();
-} 
+}
+
+// Явный экспорт по умолчанию для совместимости
+export default fetchPlayerProfile; 

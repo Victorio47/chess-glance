@@ -4,4 +4,7 @@ export async function fetchGMs(): Promise<any> {
     throw new Error(`Ошибка загрузки гроссмейстеров: ${res.status}`);
   }
   return res.json();
-} 
+}
+
+// Явный экспорт по умолчанию для совместимости
+export default fetchGMs; 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { fetchGMs } from '@/features/players/api/fetchGMs';
+import fetchGMs from '@/features/players/api/fetchGMs';
 import Loader from '@/shared/ui/Loader';
 import Link from 'next/link';
 
