@@ -17,7 +17,7 @@ const GrandmasterList: React.FC = () => {
   useEffect(() => {
     fetchGMs()
       .then((data: GMList) => {
-        setGMs(data.players);
+        setGMs(data.players || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -32,13 +32,17 @@ const GrandmasterList: React.FC = () => {
   return (
     <div className="p-4">
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-        {gms.map((username) => (
-          <li key={username} className="bg-white rounded shadow p-2 hover:bg-gray-50 transition">
-            <Link href={`/profile/${username}`} className="text-blue-600 hover:underline">
-              {username}
-            </Link>
-          </li>
-        ))}
+        {gms && gms.length > 0 ? (
+          gms.map((username) => (
+            <li key={username} className="bg-white rounded shadow p-2 hover:bg-gray-50 transition">
+              <Link href={`/profile/${username}`} className="text-blue-600 hover:underline">
+                {username}
+              </Link>
+            </li>
+          ))
+        ) : (
+          <li className="col-span-full text-center text-gray-500">No grandmasters found</li>
+        )}
       </ul>
     </div>
   );

@@ -31,7 +31,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
       <h2 className="text-lg font-bold">{name || username}</h2>
       <div className="text-gray-500 text-sm mb-2">@{username}</div>
       {country && (
-        <div className="text-gray-400 text-xs mb-1">Country: {country.split('/').pop()}</div>
+        <div className="text-gray-400 text-xs mb-1">Country: {country.split('/').pop() || country}</div>
       )}
       {status && (
         <div className="text-xs mb-1">Status: <span className="font-medium">{status}</span></div>
